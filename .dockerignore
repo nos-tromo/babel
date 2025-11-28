@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+venv
+.env
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Testing/Linting
+.mypy_cache
+.pytest_cache
+.ruff_cache
+.tox
+.coverage
+htmlcov
+tests/
+
+# IDEs
+.vscode
+.idea
+.DS_Store
+
+# Project specific
+babel.egg-info/
+Dockerfile
+README.md

@@ -1,0 +1,45 @@
+[project]
+name = "babel"
+version = "0.1.0"
+description = "Arabic dialect identification tool"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "torch>=2.9.1",
+    "transformers>=4.57.3",
+    "streamlit>=1.32.0",
+    "watchdog>=6.0.0",
+    "openai-whisper>=20250625",
+    "python-dotenv>=1.2.1",
+]
+
+[project.scripts]
+babel = "babel.app:run"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.0",
+    "pre-commit>=4.5.0",
+    "pytest>=9.0.1",
+    "ruff>=0.14.7",
+    "types-requests>=2.31.0",
+]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+nextext = { workspace = true }
+torch = [
+  { index = "pytorch-cu128", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'" },
+  { index = "pytorch-cpu",  marker = "sys_platform == 'win32'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
