@@ -29,6 +29,7 @@ tests/
 .vscode
 .idea
 .DS_Store
+*.code-workspace
 
 # Project specific
 babel.egg-info/
