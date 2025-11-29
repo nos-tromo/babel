@@ -4,12 +4,12 @@ version = "0.1.0"
 description = "Arabic dialect identification tool"
 requires-python = ">=3.11,<3.13"
 dependencies = [
-    "torch>=2.9.1",
-    "transformers>=4.57.3",
-    "streamlit>=1.32.0",
-    "watchdog>=6.0.0",
     "openai-whisper>=20250625",
     "python-dotenv>=1.2.1",
+    "streamlit>=1.32.0",
+    "torch>=2.9.1",
+    "transformers>=4.57.3",
+    "watchdog>=6.0.0",
 ]
 
 [project.scripts]
