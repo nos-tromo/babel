@@ -68,14 +68,14 @@ def main() -> None:
     )
 
     st.markdown(
-            """
+        """
             <hr style="margin-top:2rem;margin-bottom:1rem;">
             <p style="text-align:center;">
                 🔗 <a href="https://github.com/nos-tromo/babel" target="_blank">GitHub</a>
             </p>
             """,
-            unsafe_allow_html=True,
-        )
+        unsafe_allow_html=True,
+    )
 
     if uploaded_file is not None:
         st.audio(uploaded_file)
