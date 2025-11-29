@@ -42,6 +42,7 @@ def main() -> None:
     Args:
         model_id (str): The identifier of the model to load.
     """
+    st.set_page_config(page_title="Babel", layout="wide")
     st.title("Babel")
 
     st.markdown(
