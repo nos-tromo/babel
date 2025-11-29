@@ -8,7 +8,7 @@ from streamlit.web import cli as st_cli
 from babel.core import (
     detect_language,
     get_language_name,
-    load_dialect_model,
+    load_classifier,
     load_whisper_model,
     predict_dialect,
     save_uploaded_file,
@@ -55,7 +55,7 @@ def main() -> None:
     with st.spinner("Initializing models..."):
         device = set_device()
         whisper_model = load_whisper_model(device)
-        classifier = load_dialect_model(device=device)
+        classifier = load_classifier(device)
 
     if not classifier:
         st.error("Failed to load classifier. Please try again.")

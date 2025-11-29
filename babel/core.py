@@ -149,7 +149,7 @@ def get_language_name(language_code: str) -> str:
 
 
 @st.cache_resource
-def load_dialect_model(device: str) -> Pipeline:
+def load_classifier(device: str) -> Pipeline:
     """
     Load the audio classification model.
 
