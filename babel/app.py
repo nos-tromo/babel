@@ -50,7 +50,7 @@ def main() -> None:
         Upload an audio file, and the model will predict the most likely dialect with a confidence score.
         """
     )
-    st.caption("Supported formats: MP3, WAV, OGG, FLAC, MP4, MKV, AVI, MOV, WEBM")
+    st.caption("Supported formats: MP3, M4A, WAV, OGG, FLAC, MP4, MKV, AVI, MOV, WEBM")
 
     with st.spinner("Initializing models..."):
         device = set_device()
@@ -63,7 +63,7 @@ def main() -> None:
 
     uploaded_file = st.file_uploader(
         "Choose an audio or video file",
-        type=["mp3", "wav", "ogg", "flac", "mp4", "mkv", "avi", "mov", "webm"],
+        type=["mp3", "m4a", "wav", "ogg", "flac", "mp4", "mkv", "avi", "mov", "webm"],
     )
 
     if uploaded_file is not None:
