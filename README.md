@@ -4,7 +4,7 @@ Babel is a Streamlit application that uses deep learning models to identify Arab
 
 ## Features
 
-- **Multi-format Support**: Upload audio or video files in MP3, WAV, OGG, FLAC, MP4, MKV, AVI, MOV, or WEBM formats.
+- **Multi-format Support**: Upload audio or video files in MP3, M4A, WAV, OGG, FLAC, MP4, MKV, AVI, MOV, or WEBM formats.
 - **Audio Slicing**: Analyze specific segments of your media by specifying start time and duration.
 - **Language Detection**: Automatically verifies if the spoken language is Arabic using OpenAI Whisper.
 - **Dialect Identification**: Classifies the specific Arabic dialect with confidence scores.
@@ -21,22 +21,22 @@ This project uses `uv` for dependency management.
 
 1. **Clone the repository:**
 
-    ```bash
-    git clone https://github.com/nos-tromo/babel.git
-    cd babel
-    ```
+   ```bash
+   git clone https://github.com/nos-tromo/babel.git
+   cd babel
+   ```
 
 2. **Install dependencies:**
 
-    ```bash
-    uv sync
-    ```
+   ```bash
+   uv sync
+   ```
 
-    Or using pip:
+   Or using pip:
 
-    ```bash
-    pip install .
-    ```
+   ```bash
+   pip install .
+   ```
 
 ## Usage
 
@@ -60,19 +60,20 @@ You can also run Babel using Docker.
 
 1. **Build the Docker image:**
 
-    ```bash
-    docker build -t babel .
-    ```
+   ```bash
+   docker build -t babel .
+   ```
 
 2. **Run the container:**
 
-    ```bash
-    docker run -p 8000:8000 --gpus all babel
-    ```
+   ```bash
+   docker run -p 8000:8000 --gpus all babel
+   ```
 
-    The application will be available at `http://localhost:8000`.
+   The application will be available at `http://localhost:8000`.
 
-    > **Note:** The `--gpus all` flag is required for NVIDIA GPU support. For Apple Silicon or CPU-only usage, you can omit it, but performance may be slower.
+   > **Note:** The `--gpus all` flag is required for NVIDIA GPU support. For Apple Silicon or CPU-only usage, you can omit it, but performance may be slower.
+   >
 
 ## Configuration
 
