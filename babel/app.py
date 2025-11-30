@@ -5,16 +5,7 @@ from typing import Any
 import streamlit as st
 from streamlit.web import cli as st_cli
 
-from babel.core import (
-    detect_language,
-    get_language_name,
-    load_classifier,
-    load_whisper_model,
-    predict_dialect,
-    save_uploaded_file,
-    set_device,
-    slice_audio,
-)
+from babel.core import Babel
 
 
 def display_results(predictions: list[dict[str, Any]]) -> None:
@@ -35,12 +26,20 @@ def display_results(predictions: list[dict[str, Any]]) -> None:
             st.caption(f"Confidence: {pred['score']:.4f}")
 
 
+@st.cache_resource
+def get_babel() -> Babel:
+    """
+    Get the Babel instance.
+
+    Returns:
+        Babel: The Babel instance.
+    """
+    return Babel()
+
+
 def main() -> None:
     """
     Main function to run the Streamlit app.
-
-    Args:
-        model_id (str): The identifier of the model to load.
     """
     st.set_page_config(page_title="Babel", layout="wide")
     st.title("Babel")
@@ -54,13 +53,11 @@ def main() -> None:
     st.caption("Supported formats: MP3, M4A, WAV, OGG, FLAC, MP4, MKV, AVI, MOV, WEBM")
 
     with st.spinner("Initializing models..."):
-        device = set_device()
-        whisper_model = load_whisper_model(device)
-        classifier = load_classifier(device)
-
-    if not classifier:
-        st.error("Failed to load classifier. Please try again.")
-        st.stop()
+        babel = get_babel()
+        # Access properties to trigger loading within the spinner context
+        if not babel.classifier or not babel.whisper_model:
+            st.error("Failed to load models. Please try again.")
+            st.stop()
 
     uploaded_file = st.file_uploader(
         "Choose an audio or video file",
@@ -91,12 +88,14 @@ def main() -> None:
             )
 
         if st.button("Analyze Segment"):
-            tmp_file_path = save_uploaded_file(uploaded_file)
+            tmp_file_path = Babel.save_uploaded_file(uploaded_file)
             sliced_file_path = None
 
             try:
                 with st.spinner("Slicing audio..."):
-                    sliced_file_path = slice_audio(tmp_file_path, start_time, duration)
+                    sliced_file_path = Babel.slice_audio(
+                        tmp_file_path, start_time, duration
+                    )
                     if not sliced_file_path:
                         st.error(
                             "Failed to slice audio. Please check the input parameters."
@@ -104,20 +103,20 @@ def main() -> None:
                         st.stop()
 
                 with st.spinner("Detecting language..."):
-                    language = detect_language(whisper_model, sliced_file_path)
+                    language = babel.detect_language(sliced_file_path)
                     if not language:
                         st.error("Failed to detect language. Please try again.")
                         st.stop()
 
                 if language != "ar":
-                    language_name = get_language_name(language)
+                    language_name = Babel.get_language_name(language)
                     st.warning(
                         f"Detected language is {language_name.capitalize()}, not Arabic. Please upload an Arabic audio file."
                     )
                     st.stop()
 
                 with st.spinner("Analyzing..."):
-                    predictions = predict_dialect(classifier, sliced_file_path)
+                    predictions = babel.predict_dialect(sliced_file_path)
                     display_results(predictions)
                     if not predictions:
                         st.error("No predictions were made. Please try again.")
