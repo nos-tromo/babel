@@ -9,7 +9,6 @@ from loguru import logger
 
 load_dotenv()
 APP_NAME = os.getenv("APP_NAME", "babel")
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 LOG_ROTATION = os.getenv("LOG_ROTATION", "5 MB")
 LOG_RETENTION = os.getenv("LOG_RETENTION", "3")
 
@@ -28,7 +27,7 @@ def _resolve_log_path(
     """
     if default_log_path is None:
         default_log_path = (
-            Path(__file__).resolve().parents[2] / ".logs" / f"{APP_NAME}.log"
+            Path(__file__).resolve().parents[1] / ".logs" / f"{APP_NAME}.log"
         )
 
     env_log_path = os.getenv("LOG_PATH")
@@ -68,8 +67,6 @@ def setup_logging(
     """
     log_path = _resolve_log_path(default_log_path)
 
-    if level is None:
-        level = LOG_LEVEL
     if rotation is None:
         rotation = LOG_ROTATION
     if retention is None:
@@ -81,7 +78,7 @@ def setup_logging(
 
     logger.add(
         sink=sys.stderr,
-        level=level,
+        level="WARNING",
         backtrace=backtrace,
         diagnose=diagnose,
         format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level:<8} | {name} | {message}",
