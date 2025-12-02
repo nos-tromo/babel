@@ -55,7 +55,7 @@ def main() -> None:
     with st.spinner("Initializing models..."):
         babel = get_babel()
         # Access properties to trigger loading within the spinner context
-        if not babel.classifier or not babel.whisper_model:
+        if not hasattr(babel, "classifier") or not hasattr(babel, "whisper_model"):
             st.error("Failed to load models. Please try again.")
             st.stop()
 
