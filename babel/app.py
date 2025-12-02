@@ -88,12 +88,12 @@ def main() -> None:
             )
 
         if st.button("Analyze Segment"):
-            tmp_file_path = Babel.save_uploaded_file(uploaded_file)
+            tmp_file_path = babel.save_uploaded_file(uploaded_file)
             sliced_file_path = None
 
             try:
                 with st.spinner("Slicing audio..."):
-                    sliced_file_path = Babel.slice_audio(
+                    sliced_file_path = babel.slice_audio(
                         tmp_file_path, start_time, duration
                     )
                     if not sliced_file_path:
@@ -109,7 +109,7 @@ def main() -> None:
                         st.stop()
 
                 if language != "ar":
-                    language_name = Babel.get_language_name(language)
+                    language_name = babel.get_language_name(language)
                     st.warning(
                         f"Detected language is {language_name.capitalize()}, not Arabic. Please upload an Arabic audio file."
                     )
