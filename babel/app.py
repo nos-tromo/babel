@@ -138,9 +138,17 @@ def run() -> None:
     line. It sets up the command line arguments as if the user typed them. For example: `streamlit
     run app.py <any extra args>`.
     """
-    sys.argv = ["streamlit", "run", __file__] + sys.argv[1:]
+    app_path = Path(__file__).resolve()
+    sys.argv = ["streamlit", "run", str(app_path)] + sys.argv[1:]
     sys.exit(st_cli.main())
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        if exists():
+            main()
+        else:
+            run()
+    except ImportError as e:
+        logger.exception(f"Failed to run the Streamlit app: {e}")
+        run()
