@@ -169,7 +169,9 @@ class Babel:
             best_result = max(dialects, key=lambda x: x.get("score", 0))
             best_dialect = best_result.get("label", "unknown")
             best_score = best_result.get("score", 0)
-            logger.info(f"Predicted best dialect: {best_dialect} (confidence: {best_score})")
+            logger.info(
+                f"Predicted best dialect: {best_dialect} (confidence: {best_score})"
+            )
             return dialects
         logger.info("No dialects predicted.")
         return []
