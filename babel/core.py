@@ -7,9 +7,12 @@ from typing import Any
 import streamlit as st
 import torch
 import whisper  # type: ignore
+from dotenv import load_dotenv
 from loguru import logger
 from transformers import Pipeline, pipeline
 from whisper.tokenizer import LANGUAGES  # type: ignore
+
+load_dotenv()
 
 
 class Babel:
