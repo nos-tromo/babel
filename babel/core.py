@@ -7,6 +7,7 @@ from typing import Any
 import streamlit as st
 import torch
 import whisper  # type: ignore
+from loguru import logger
 from transformers import Pipeline, pipeline
 from whisper.tokenizer import LANGUAGES  # type: ignore
 
@@ -18,6 +19,9 @@ class Babel:
             "DIALECT_MODEL", "badrex/mms-300m-arabic-dialect-identifier"
         )
         self.whisper_model_id = os.getenv("WHISPER_MODEL", "turbo")
+        self._whisper_model: str | Any | None = None
+        self._classifier: Pipeline | None = None
+        logger.info("Babel instance initialized.")
 
     @staticmethod
     def get_device() -> str:
@@ -27,13 +31,15 @@ class Babel:
         Returns:
             str: The device to be used for inference.
         """
-        return (
+        device = (
             "cuda"
             if torch.cuda.is_available()
             else "mps"
             if torch.backends.mps.is_available()
             else "cpu"
         )
+        logger.info(f"Using device: {device}")
+        return device
 
     @staticmethod
     @st.cache_resource
@@ -76,8 +82,21 @@ class Babel:
 
         Returns:
             Any: The loaded Whisper model.
+
+        Raises:
+            RuntimeError: If the Whisper model is not loaded.
         """
-        return self.load_whisper_model(self.whisper_model_id, self.device)
+        if self._whisper_model is None:
+            self._whisper_model = self.load_whisper_model(
+                self.whisper_model_id, self.device
+            )
+            logger.info(
+                f"Whisper model '{self.whisper_model_id}' loaded on device '{self.device}'"
+            )
+        if self._whisper_model is None:
+            logger.error("Whisper model is not loaded.")
+            raise RuntimeError("Whisper model is not loaded.")
+        return self._whisper_model
 
     @property
     def classifier(self) -> Pipeline:
@@ -86,8 +105,19 @@ class Babel:
 
         Returns:
             Pipeline: The loaded audio classification pipeline.
+
+        Raises:
+            RuntimeError: If the classifier model is not loaded.
         """
-        return self.load_classifier(self.dialect_model_id, self.device)
+        if self._classifier is None:
+            self._classifier = self.load_classifier(self.dialect_model_id, self.device)
+            logger.info(
+                f"Audio classification model '{self.dialect_model_id}' loaded on device '{self.device}'"
+            )
+        if self._classifier is None:
+            logger.error("Classifier model is not loaded.")
+            raise RuntimeError("Classifier model is not loaded.")
+        return self._classifier
 
     def detect_language(self, audio_path: str) -> str:
         """
@@ -108,8 +138,11 @@ class Babel:
         ).to(self.whisper_model.device)
         _, probs = self.whisper_model.detect_language(mel)
         if not probs:
+            logger.error("Language detection failed; no probabilities returned.")
             raise ValueError("Language detection failed; no probabilities returned.")
-        return str(max(probs, key=probs.get))
+        language = str(max(probs, key=probs.get))
+        logger.info(f"Detected language: {language}")
+        return language
 
     def predict_dialect(self, file: str) -> list[dict[str, Any]]:
         """
@@ -127,11 +160,19 @@ class Babel:
                 predictions = list(predictions)
             else:
                 predictions = [predictions]
-        return [
+        dialects = [
             dict(prediction)
             for prediction in predictions
             if isinstance(prediction, dict)
         ]
+        if dialects:
+            best_result = max(dialects, key=lambda x: x.get("score", 0))
+            best_dialect = best_result.get("label", "unknown")
+            best_score = best_result.get("score", 0)
+            logger.info(f"Predicted best dialect: {best_dialect} (confidence: {best_score})")
+            return dialects
+        logger.info("No dialects predicted.")
+        return []
 
     @staticmethod
     def get_language_name(language_code: str) -> str:
@@ -144,7 +185,11 @@ class Babel:
         Returns:
             str: The full name of the language.
         """
-        return LANGUAGES.get(language_code, "Unknown").title()
+        language = LANGUAGES.get(language_code, "Unknown").title()
+        logger.info(
+            f"Language code '{language_code}' corresponds to language '{language}'"
+        )
+        return language
 
     @staticmethod
     def save_uploaded_file(uploaded_file: Any) -> str:
@@ -163,6 +208,7 @@ class Babel:
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
             tmp_file.write(uploaded_file.getvalue())
+            logger.info(f"Uploaded file saved to temporary path: {tmp_file.name}")
             return tmp_file.name
 
     @staticmethod
@@ -210,8 +256,10 @@ class Babel:
         )
 
         if Path(output_path).stat().st_size == 0:
+            logger.error("Sliced audio file is empty. Check start time and duration.")
             raise ValueError(
                 "Sliced audio file is empty. Check start time and duration."
             )
+        logger.info(f"Sliced audio file created at: {output_path}")
 
         return output_path

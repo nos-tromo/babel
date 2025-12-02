@@ -3,9 +3,14 @@ from pathlib import Path
 from typing import Any
 
 import streamlit as st
+from loguru import logger
+from streamlit.runtime import exists
 from streamlit.web import cli as st_cli
 
 from babel.core import Babel
+from babel.logging_cfg import setup_logging
+
+setup_logging()
 
 
 def display_results(predictions: list[dict[str, Any]]) -> None:
@@ -41,6 +46,7 @@ def main() -> None:
     """
     Main function to run the Streamlit app.
     """
+    logger.info("Starting Babel Streamlit app")
     st.set_page_config(page_title="Babel", layout="wide")
     st.title("Babel")
 
@@ -56,8 +62,10 @@ def main() -> None:
         babel = get_babel()
         # Access properties to trigger loading within the spinner context
         if not hasattr(babel, "classifier") or not hasattr(babel, "whisper_model"):
+            logger.error("Failed to load models")
             st.error("Failed to load models. Please try again.")
             st.stop()
+        logger.info("Models initialized successfully")
 
     uploaded_file = st.file_uploader(
         "Choose an audio or video file",
@@ -75,6 +83,7 @@ def main() -> None:
     )
 
     if uploaded_file is not None:
+        logger.info(f"File uploaded: {uploaded_file.name}")
         st.audio(uploaded_file)
 
         st.divider()
@@ -88,6 +97,9 @@ def main() -> None:
             )
 
         if st.button("Analyze Segment"):
+            logger.info(
+                f"Starting analysis for {uploaded_file.name} (start={start_time}, duration={duration})"
+            )
             tmp_file_path = babel.save_uploaded_file(uploaded_file)
             sliced_file_path = None
 
@@ -97,6 +109,7 @@ def main() -> None:
                         tmp_file_path, start_time, duration
                     )
                     if not sliced_file_path:
+                        logger.error("Audio slicing failed")
                         st.error(
                             "Failed to slice audio. Please check the input parameters."
                         )
@@ -105,11 +118,14 @@ def main() -> None:
                 with st.spinner("Detecting language..."):
                     language = babel.detect_language(sliced_file_path)
                     if not language:
+                        logger.error("Language detection failed")
                         st.error("Failed to detect language. Please try again.")
                         st.stop()
+                    logger.info(f"Detected language: {language}")
 
                 if language != "ar":
                     language_name = babel.get_language_name(language)
+                    logger.warning(f"Non-Arabic language detected: {language_name}")
                     st.warning(
                         f"Detected language is {language_name.capitalize()}, not Arabic. Please upload an Arabic audio file."
                     )
@@ -119,9 +135,16 @@ def main() -> None:
                     predictions = babel.predict_dialect(sliced_file_path)
                     display_results(predictions)
                     if not predictions:
+                        logger.error("Dialect prediction returned no results")
                         st.error("No predictions were made. Please try again.")
                         st.stop()
+                    logger.info(
+                        f"Analysis complete. Top prediction: {predictions[0]['label']}"
+                    )
 
+            except Exception as e:
+                logger.exception(f"An unexpected error occurred: {e}")
+                st.error(f"An unexpected error occurred: {e}")
             finally:
                 # Cleanup sliced file
                 if sliced_file_path:
