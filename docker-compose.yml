@@ -1,0 +1,62 @@
+services:
+  ##########################################################
+  # Babel (CPU)
+  ##########################################################
+  babel-cpu:
+    profiles: ["cpu"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_PATH=/app/.logs/babel-cpu.log
+      - USE_DEVICE=auto
+    volumes:
+      - babel-logs:/app/.logs
+      - model-cache:/root/.cache
+    networks:
+      babel-net:
+        aliases:
+          - babel-net
+
+  ##########################################################
+  # Backend (GPU)
+  ##########################################################
+  babel-gpu:
+    profiles: ["gpu"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_PATH=/app/.logs/babel-gpu.log
+      - NVIDIA_VISIBLE_DEVICES=all
+      - USE_DEVICE=auto
+    volumes:
+      - babel-logs:/app/.logs
+      - model-cache:/root/.cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    networks:
+      babel-net:
+        aliases:
+          - babel-net
+
+##########################################################
+# Volumes
+##########################################################
+volumes:
+  babel-logs:
+  model-cache:
+
+##########################################################
+# Networks
+##########################################################
+networks:
+  babel-net:

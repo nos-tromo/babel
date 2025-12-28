@@ -1,4 +1,3 @@
-import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -7,21 +6,19 @@ from typing import Any
 import streamlit as st
 import torch
 import whisper  # type: ignore
-from dotenv import load_dotenv
 from loguru import logger
 from transformers import Pipeline, pipeline
 from whisper.tokenizer import LANGUAGES  # type: ignore
 
-load_dotenv()
+from babel.utils.env_cfg import load_model_env
 
 
 class Babel:
     def __init__(self) -> None:
         self.device = self.get_device()
-        self.dialect_model_id = os.getenv(
-            "DIALECT_MODEL", "badrex/mms-300m-arabic-dialect-identifier"
-        )
-        self.whisper_model_id = os.getenv("WHISPER_MODEL", "turbo")
+        models = load_model_env()
+        self.dialect_model_id = models.dialect_model
+        self.whisper_model_id = models.whisper_model
         self._whisper_model: str | Any | None = None
         self._classifier: Pipeline | None = None
         logger.info("Babel instance initialized.")

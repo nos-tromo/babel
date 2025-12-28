@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 babel = "babel.app:run"
+load-models = "babel.utils.model_cfg:main"
 
 [dependency-groups]
 dev = [

@@ -8,9 +8,11 @@ from streamlit.runtime import exists
 from streamlit.web import cli as st_cli
 
 from babel.core import Babel
-from babel.logging_cfg import setup_logging
+from babel.utils.logging_cfg import setup_logging
+from babel.utils.env_cfg import set_offline_env
 
 setup_logging()
+set_offline_env()
 
 
 def display_results(predictions: list[dict[str, Any]]) -> None:
