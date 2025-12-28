@@ -40,40 +40,51 @@ This project uses `uv` for dependency management.
 
 ## Usage
 
-To start the application, run:
+Start locally (uses default host/port):
 
 ```bash
 uv run babel
 ```
 
-Or if installed in your environment:
+Bind to all interfaces or change port if needed:
 
 ```bash
-babel
+uv run babel --server.address=0.0.0.0 --server.port=8000 --browser.gatherUsageStats=false
 ```
 
-This will launch the Streamlit interface in your default web browser.
+If installed as a package, the `babel` console script is available and accepts the same flags.
 
 ## Docker
 
-You can also run Babel using Docker.
+### Single container
 
-1. **Build the Docker image:**
+1. **Build**
 
    ```bash
    docker build -t babel .
    ```
 
-2. **Run the container:**
+2. **Run (CPU-only example)**
 
    ```bash
-   docker run -p 8000:8000 --gpus all babel
+   docker run \
+     -p 8000:8000 \
+     -e LOG_PATH=/app/.logs/babel.log \
+     -v babel-logs:/app/.logs \
+     -v model-cache:/root/.cache \
+     babel
    ```
 
-   The application will be available at `http://localhost:8000`.
+   For NVIDIA GPUs, add `--gpus all`.
 
-   > **Note:** The `--gpus all` flag is required for NVIDIA GPU support. For Apple Silicon or CPU-only usage, you can omit it, but performance may be slower.
-   >
+### Docker Compose (recommended)
+
+Profiles are defined for CPU and GPU. The image uses persistent volumes for logs and model cache so you don’t redownload models on rebuilds.
+
+- CPU: `docker compose --profile cpu up --build`
+- GPU: `docker compose --profile gpu up --build` (requires NVIDIA runtime)
+
+Service ports: `8000` exposed locally. Logs are written to `babel-logs` volume; model weights/cache stored in `model-cache`.
 
 ## Configuration
 
@@ -86,6 +97,12 @@ WHISPER_MODEL=turbo
 
 - `DIALECT_MODEL`: The Hugging Face model ID for dialect identification.
 - `WHISPER_MODEL`: The Whisper model size (e.g., `tiny`, `base`, `small`, `medium`, `large`, `turbo`).
+
+For Docker configurations, populate an `.env.docker` file in the project's root:
+
+```bash
+cp .env.docker.example .env.docker
+```
 
 ## Development
 
